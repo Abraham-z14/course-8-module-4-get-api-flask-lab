@@ -1,110 +1,189 @@
+# Building RESTful GET APIs with Flask
 
-# Module Lab: Building RESTful GET APIs with Flask
+A small read-only RESTful API built with Python and Flask.
 
-## Learning Goals
+The application demonstrates:
 
-- Implement RESTful API endpoints using Flask.
-- Handle HTTP GET methods to serve resource data.
-- Support query parameters and dynamic route segments.
-- Return consistent JSON responses using `jsonify()`.
-- Follow RESTful conventions in route structure and response formatting.
+- HTTP GET routes
+- JSON responses
+- collection endpoints
+- individual resource endpoints
+- query-string filtering
+- dynamic URL parameters
+- case-insensitive filtering
+- 404 error handling
 
-## Introduction
+## Features
 
-In this lab, you will build a **Read-Only RESTful API** to serve a list of products. The API will allow users to:
+The API exposes four main behaviors:
 
-- Access a homepage route with a welcome message
-- Retrieve all products via `GET /products`
-- Fetch a specific product using `GET /products/<id>`
-- Filter products by category using a query string (`/products?category=books`)
+### Homepage
 
-You’ll simulate a product catalog using an in-memory list of dictionaries, format all responses as JSON, and follow best practices for route design and error handling.
-
-## Setup Instructions
-
-### Fork and Clone the Repository
-
-1. Go to the provided GitHub repository link.
-2. Fork the repository to your GitHub account.
-3. Clone the forked repository to your local machine:
-
-```bash
-git clone <repo-url>
-cd course-8-module-4-get-api-flask
+```text
+GET /
 ```
 
-### Install Dependencies
+Returns a JSON welcome message.
 
-Ensure Python is installed:
+Example:
 
-```bash
-python --version
+```json
+{
+  "message": "Welcome to the product catalog API"
+}
 ```
 
-Install Flask and dependencies using pipenv:
+### Get All Products
+
+```text
+GET /products
+```
+
+Returns the full product catalog as JSON.
+
+Example response:
+
+```json
+[
+  {
+    "id": 1,
+    "name": "Laptop",
+    "price": 899.99,
+    "category": "electronics"
+  },
+  {
+    "id": 2,
+    "name": "Book",
+    "price": 14.99,
+    "category": "books"
+  },
+  {
+    "id": 3,
+    "name": "Desk",
+    "price": 199.99,
+    "category": "furniture"
+  }
+]
+```
+
+### Get One Product
+
+```text
+GET /products/<id>
+```
+
+Returns the product matching the requested ID.
+
+Example:
+
+```text
+GET /products/2
+```
+
+Response:
+
+```json
+{
+  "id": 2,
+  "name": "Book",
+  "price": 14.99,
+  "category": "books"
+}
+```
+
+If the product does not exist, the API returns:
+
+```text
+404 Not Found
+```
+
+with a JSON error message:
+
+```json
+{
+  "error": "Product not found"
+}
+```
+
+### Filter Products by Category
+
+```text
+GET /products?category=books
+```
+
+Returns only products in the requested category.
+
+Filtering is case-insensitive, so values such as:
+
+```text
+books
+Books
+BOOKS
+```
+
+are treated the same.
+
+## Product Data
+
+The mock product catalog contains:
+
+```python
+products = [
+    {
+        "id": 1,
+        "name": "Laptop",
+        "price": 899.99,
+        "category": "electronics",
+    },
+    {
+        "id": 2,
+        "name": "Book",
+        "price": 14.99,
+        "category": "books",
+    },
+    {
+        "id": 3,
+        "name": "Desk",
+        "price": 199.99,
+        "category": "furniture",
+    },
+]
+```
+
+## Project Structure
+
+```text
+course-8-module-4-get-api-flask-lab/
+├── images/
+│   └── tests-passing.png
+├── tests/
+│   ├── __init__.py
+│   └── test_app.py
+├── app.py
+├── data.py
+├── Pipfile
+├── Pipfile.lock
+├── pytest.ini
+└── README.md
+```
+
+## Setup
+
+Install dependencies:
 
 ```bash
 pipenv install
+```
+
+Enter the virtual environment:
+
+```bash
 pipenv shell
 ```
 
-Or with pip:
+This project uses Python 3.10.
 
-```bash
-pip install flask
-```
-
-## Tasks
-
-### Task 1: Define the Problem
-
-You’re building a basic product catalog API. It should:
-
-- Display a welcome message at `/`
-- Serve all products with `GET /products`
-- Retrieve individual products via `GET /products/<id>`
-- Filter products by category using a query string (e.g. `/products?category=books`)
-
----
-
-### Task 2: Determine the Design
-
-The Flask API should:
-
-- Use `@app.route()` decorators with `methods=["GET"]`
-- Use `request.args.get()` to handle query parameters
-- Return all output using `jsonify()`
-- Return meaningful HTTP status codes (`200`, `404`)
-
----
-
-### Task 3: Develop the Code
-
-Create `app.py` and start with the following structure:
-
-```python
-from flask import Flask, jsonify, request
-
-app = Flask(__name__)
-
-# Mock data
-products = [
-    {"id": 1, "name": "Laptop", "price": 899.99, "category": "electronics"},
-    {"id": 2, "name": "Book", "price": 14.99, "category": "books"},
-    {"id": 3, "name": "Desk", "price": 199.99, "category": "furniture"},
-]
-
-# TODO: Implement homepage route that returns a welcome message
-# TODO: Implement GET /products route that returns all products or filters by category
-# TODO: Implement GET /products/<id> route that returns a product by ID or 404
-
-if __name__ == "__main__":
-    app.run(debug=True)
-```
-
----
-
-### Task 4: Test the API
+## Running the API
 
 Start the Flask development server:
 
@@ -112,50 +191,115 @@ Start the Flask development server:
 python app.py
 ```
 
-Test your endpoints using your browser, Postman, or curl:
+By default, Flask runs at:
 
-- `GET http://localhost:5000/`
-- `GET http://localhost:5000/products`
-- `GET http://localhost:5000/products/2`
-- `GET http://localhost:5000/products?category=books`
+```text
+http://127.0.0.1:5000
+```
 
----
+## Example Requests
 
-## Best Practices
+Homepage:
 
-- Use plural nouns for collection routes (e.g., `/products`)
-- Normalize input (e.g., `.lower()`) when filtering by query string
-- Use `jsonify()` for all responses
-- Return:
-  - `200 OK` for successful GET requests
-  - `404 Not Found` if a product ID doesn’t exist
-- Include inline comments to explain your logic
+```text
+http://127.0.0.1:5000/
+```
 
----
+All products:
 
-## Considerations
+```text
+http://127.0.0.1:5000/products
+```
 
-**1. Input Validation**
-- Handle invalid query parameters or IDs with a clear error message.
+One product:
 
-**2. Case Sensitivity in Filtering**
-- Normalize both category input and stored data to avoid mismatches.
+```text
+http://127.0.0.1:5000/products/2
+```
 
-**3. Consistent Response Structure**
-- Ensure all responses follow the same JSON format.
+Filtered products:
 
-**4. Modular Code**
-- Keep logic clean and organized. As your API grows, consider separating routes into blueprints and data into separate modules.
+```text
+http://127.0.0.1:5000/products?category=books
+```
 
----
+## REST Design
 
-## Conclusion
+The application follows several REST conventions:
 
-After completing this lab, you will:
+- collection routes use plural nouns such as `/products`
+- GET requests retrieve data without modifying it
+- JSON is returned using `jsonify()`
+- dynamic route parameters identify individual resources
+- query parameters filter collections
+- successful requests return `200 OK`
+- missing resources return `404 Not Found`
 
-✅ Understand RESTful GET route structure  
-✅ Build routes that serve both collections and single resources  
-✅ Use query strings to filter results  
-✅ Return structured JSON and meaningful HTTP responses  
+## Query Filtering
 
-This lays the foundation for full CRUD APIs in the next module.
+The category filter is read using:
+
+```python
+request.args.get("category")
+```
+
+Both the user input and stored category are normalized with `.lower()` before comparison.
+
+This prevents case differences from producing incorrect results.
+
+## Error Handling
+
+If a requested product ID does not exist, the API returns:
+
+```text
+404 Not Found
+```
+
+with:
+
+```json
+{
+  "error": "Product not found"
+}
+```
+
+This gives API clients a clear machine-readable error response instead of failing silently.
+
+## Testing
+
+Run the automated test suite with:
+
+```bash
+python -m pytest -v
+```
+
+Current result:
+
+```text
+5 passed
+```
+
+The tests verify:
+
+- the homepage returns a `200` response with a welcome message
+- `/products` returns a product list
+- `/products/2` returns the correct product
+- `/products/99` returns `404`
+- `/products?category=books` returns filtered results
+
+## Completed Test Suite
+
+![Passing REST API tests](images/tests-passing.png)
+
+## Technologies
+
+- Python
+- Flask
+- pytest
+- Pipenv
+- Git
+- GitHub
+
+## Author
+
+Abraham Zarate
